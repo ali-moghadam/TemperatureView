@@ -1,4 +1,6 @@
 package com.alirnp.tempretureview
 
-class TemperatureView {
+import android.view.View
+
+class TemperatureView  {
 }
