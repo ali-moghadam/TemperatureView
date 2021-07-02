@@ -1,0 +1,3 @@
+rootProject.name = "TemperatureViewExample"
+include ':app'
+include ':tempretureView'
