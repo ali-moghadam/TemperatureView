@@ -11,10 +11,14 @@ import com.alirnp.tempretureview.callback.OnSeekChangeListener
 import com.alirnp.tempretureview.utils.CircleArea
 import com.alirnp.tempretureview.utils.SizeConvertor
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 class TemperatureView : View {
 
+
     private val sizeConverter by lazy { SizeConvertor(context) }
+
+    private var onSeekChangeListener: OnSeekChangeListener? = null
 
     private val DEFAULT_TEXT_CENTER = "Celsius"
     private val DEFAULT_TEXT_BOTTOM = "Freezer Temp"
@@ -28,25 +32,26 @@ class TemperatureView : View {
     private val DEFAULT_TOP_TEXT_SIZE = sizeConverter.dpToPx(32f).toInt()
     private val DEFAULT_BOTTOM_TEXT_SIZE: Int = sizeConverter.dpToPx(28f).toInt()
 
-    private var mRadiusBackgroundProgress = 0f
-    private var mRadiusCircleValueShadowShader: Float = 0f
-    private var mRadiusCircleValueShadow: Float = 0f
-    private var mRadiusCircleValue: Float = 0f
-    private var mRadiusCircleValueCenter: Float = 0f
+    private var mRadiusBackgroundProgress = sizeConverter.dpToPx(80f)
+    private val mRadiusCircleValueShadowShader by lazy { mPaintBackgroundProgress.strokeWidth }
+    private val mRadiusCircleValueShadow by lazy { mRadiusCircleValueShadowShader / 2f }
+    private val mRadiusCircleValue by lazy { mRadiusCircleValueShadow / 1.4f }
+    private val mRadiusCircleValueCenter by lazy { mRadiusCircleValue / 2f }
+
     private var lengthOfHandClock: Float = 0f
-    private var mFloatMaxSweepDegree = 0f
+    private var mFloatMaxSweepDegree = DEFAULT_MAX_SWEEP_DEGREE
     private var mFloatPointerDegree: Float = 0f
     private var mFloatCenterXCircle = 0f
     private var mFloatCenterYCircle: Float = 0f
     private var mFloatBeginOfClockLines = 0f
     private var mFloatEndOfClockLines: Float = 0f
 
-    private var mColorPrimary = 0
+    private var mColorPrimary = DEFAULT_COLOR_PRIMARY
     private var mColorProgressBackground: Int = 0
     private var mIntegerValue = 0
     private var mIntegerMinValue: Int = 0
     private var mIntegerMaxValue: Int = 0
-    private var mIntegerStrokeWidth = 0
+    private var mIntegerStrokeWidth = DEFAULT_STROKE_WIDTH
     private var mHeightBackgroundProgress = 0
     private var mWidthBackgroundProgress: Int = 0
     private var mTextSizeTop = 0
@@ -54,25 +59,97 @@ class TemperatureView : View {
 
     private var accessMoving = false
 
-    private lateinit var mRectBackground: RectF
-    private lateinit var mRectProgress: RectF
-    private lateinit var mPaintBackground: Paint
-    private lateinit var mPaintBackgroundProgress: Paint
-    private lateinit var mPaintProgress: Paint
-    private lateinit var mPaintValue: Paint
-    private lateinit var mPaintCenter: Paint
-    private lateinit var mPaintValueShadow: Paint
-    private lateinit var mPaintDegree: Paint
-    private lateinit var mPaintTopText: Paint
-    private lateinit var mPaintCenterText: Paint
-    private lateinit var mPaintBottomText: Paint
+    private var mRectBackground: RectF = RectF()
+    private var mRectProgress: RectF = RectF()
 
-    private var mStringTextCenter: String = "Celsius"
-    private var mStringTextBottom: String = "Freezer Temp"
+
+    private val mPaintBackground by lazy {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            style = Paint.Style.FILL
+        }
+    }
+
+    private val mPaintBackgroundProgress by lazy {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            strokeWidth = mIntegerStrokeWidth.toFloat()
+            color = adjustAlpha(mColorProgressBackground, 0.08f)
+            style = Paint.Style.STROKE
+            strokeCap = Paint.Cap.ROUND
+        }
+    }
+
+    private val mPaintProgress by lazy {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            strokeWidth = (mIntegerStrokeWidth / 3).toFloat()
+            color = mColorPrimary
+            style = Paint.Style.STROKE
+            strokeCap = Paint.Cap.ROUND
+        }
+    }
+
+    private val mPaintValue by lazy {
+        Paint().apply {
+            color = Color.WHITE
+            style = Paint.Style.FILL
+        }
+    }
+
+    private val mPaintCenter by lazy {
+        Paint().apply {
+            color = Color.BLACK
+            style = Paint.Style.FILL
+        }
+    }
+
+
+    private val mPaintDegree by lazy {
+        Paint().apply {
+            isAntiAlias = true
+            strokeWidth = mPaintBackgroundProgress.strokeWidth / 7f
+            color = mColorPrimary
+            style = Paint.Style.STROKE
+            strokeCap = Paint.Cap.ROUND
+        }
+    }
+
+    private val mPaintTopText by lazy {
+        Paint().apply {
+            isAntiAlias = true
+            color = Color.BLACK
+            textAlign = Paint.Align.CENTER
+            style = Paint.Style.FILL_AND_STROKE
+            textSize = mTextSizeTop.toFloat()
+        }
+    }
+
+    private val mPaintCenterText by lazy {
+        Paint().apply {
+            isAntiAlias = true
+            color = Color.GRAY
+            textAlign = Paint.Align.CENTER
+            style = Paint.Style.FILL_AND_STROKE
+            textSize = mTextSizeTop / 1.5f
+        }
+    }
+
+    private val mPaintBottomText by lazy {
+        Paint().apply {
+            isAntiAlias = true
+            color = mColorPrimary
+            textAlign = Paint.Align.CENTER
+            style = Paint.Style.FILL_AND_STROKE
+            textSize = mTextSizeBottom.toFloat()
+        }
+    }
+
+    private val mPaintValueShadow: Paint = Paint()
+
+    private var mStringTextCenter: String = DEFAULT_TEXT_CENTER
+    private var mStringTextBottom: String = DEFAULT_TEXT_BOTTOM
     private lateinit var mContext: Context
     private var mCircleArea: CircleArea = CircleArea()
 
-    private var onSeekChangeListener: OnSeekChangeListener? = null
 
     /**
      * onSizeChanged holder values
@@ -128,16 +205,17 @@ class TemperatureView : View {
         }
         //Radius
         //Radius
-        if (widthMeasureMode == MeasureSpec.EXACTLY && heightMeasureMode == MeasureSpec.EXACTLY) {
-            val size = min(widthMeasureSize, heightMeasureSize)
-            mRadiusBackgroundProgress = (size - mPaintBackgroundProgress.getStrokeWidth()) / 2
-        } else if (widthMeasureMode == MeasureSpec.AT_MOST || heightMeasureMode == MeasureSpec.AT_MOST) {
-            val size: Int = min(width - getHorizontalPadding(), height - getVerticalPadding())
-            mRadiusBackgroundProgress = (size - mPaintBackgroundProgress.getStrokeWidth()) / 2
-        } else {
-            //Default Value
-            mRadiusBackgroundProgress = sizeConverter.dpToPx(80f)
-        }
+        mRadiusBackgroundProgress =
+            if (widthMeasureMode == MeasureSpec.EXACTLY && heightMeasureMode == MeasureSpec.EXACTLY) {
+                val size = min(widthMeasureSize, heightMeasureSize)
+                (size - mPaintBackgroundProgress.strokeWidth) / 2
+            } else if (widthMeasureMode == MeasureSpec.AT_MOST || heightMeasureMode == MeasureSpec.AT_MOST) {
+                val size: Int = min(width - getHorizontalPadding(), height - getVerticalPadding())
+                (size - mPaintBackgroundProgress.strokeWidth) / 2
+            } else {
+                //Default Value
+                sizeConverter.dpToPx(80f)
+            }
         mWidthBackgroundProgress = width
         mHeightBackgroundProgress = height
 
@@ -257,52 +335,6 @@ class TemperatureView : View {
         return drawY
     }
 
-    private fun initPaints() {
-        mPaintBackground = Paint(Paint.ANTI_ALIAS_FLAG)
-        mPaintBackground.color = Color.WHITE
-        mPaintBackground.style = Paint.Style.FILL
-        mPaintBackgroundProgress = Paint(Paint.ANTI_ALIAS_FLAG)
-        mPaintBackgroundProgress.strokeWidth = mIntegerStrokeWidth.toFloat()
-        mPaintBackgroundProgress.color = adjustAlpha(mColorProgressBackground, 0.08f)
-        mPaintBackgroundProgress.style = Paint.Style.STROKE
-        mPaintBackgroundProgress.strokeCap = Paint.Cap.ROUND
-        mPaintProgress = Paint(Paint.ANTI_ALIAS_FLAG)
-        mPaintProgress.strokeWidth = (mIntegerStrokeWidth / 3).toFloat()
-        mPaintProgress.color = mColorPrimary
-        mPaintProgress.style = Paint.Style.STROKE
-        mPaintProgress.strokeCap = Paint.Cap.ROUND
-        mPaintValue = Paint()
-        mPaintValue.color = Color.WHITE
-        mPaintValue.style = Paint.Style.FILL
-        mPaintCenter = Paint()
-        mPaintCenter.color = Color.BLACK
-        mPaintCenter.style = Paint.Style.FILL
-        mPaintValueShadow = Paint()
-        mPaintDegree = Paint()
-        mPaintDegree.isAntiAlias = true
-        mPaintDegree.strokeWidth = mPaintBackgroundProgress.strokeWidth / 7f
-        mPaintDegree.color = mColorPrimary
-        mPaintDegree.style = Paint.Style.STROKE
-        mPaintDegree.strokeCap = Paint.Cap.ROUND
-        mPaintTopText = Paint()
-        mPaintTopText.isAntiAlias = true
-        mPaintTopText.color = Color.BLACK
-        mPaintTopText.textAlign = Paint.Align.CENTER
-        mPaintTopText.style = Paint.Style.FILL_AND_STROKE
-        mPaintTopText.textSize = mTextSizeTop.toFloat()
-        mPaintCenterText = Paint()
-        mPaintCenterText.isAntiAlias = true
-        mPaintCenterText.color = Color.GRAY
-        mPaintCenterText.textAlign = Paint.Align.CENTER
-        mPaintCenterText.style = Paint.Style.FILL_AND_STROKE
-        mPaintCenterText.textSize = mTextSizeTop / 1.5f
-        mPaintBottomText = Paint()
-        mPaintBottomText.isAntiAlias = true
-        mPaintBottomText.color = mColorPrimary
-        mPaintBottomText.textAlign = Paint.Align.CENTER
-        mPaintBottomText.style = Paint.Style.FILL_AND_STROKE
-        mPaintBottomText.textSize = mTextSizeBottom.toFloat()
-    }
 
     private fun getAngleFromPoint(
         firstPointX: Double,
@@ -474,7 +506,7 @@ class TemperatureView : View {
                     x >= mCircleArea.getXStart() && x <= mCircleArea.getXEnd() && y >= mCircleArea.getYStart() && y <= mCircleArea.getYEnd()
                 if (found) {
                     accessMoving = true
-                    onSeekChangeListener?.OnMove(false)
+                    onSeekChangeListener?.onMoving(false)
                     // TODO: 7/5/2021    break removed
                 } else {
                     accessMoving = false
@@ -504,7 +536,7 @@ class TemperatureView : View {
                 }
             }
             MotionEvent.ACTION_UP -> {
-                onSeekChangeListener?.OnMove(true)
+                onSeekChangeListener?.onMoving(true)
                 onSeekChangeListener?.let { listener ->
                     if (accessMoving) listener.onSeekComplete(
                         mIntegerValue
@@ -582,13 +614,13 @@ class TemperatureView : View {
      * The minimum & maximum value you can set to the view
      */
     fun setValues(@StringRes textBottom: Int, value: Int, minValue: Int, maxValue: Int) {
-        val text = mContext!!.getString(textBottom)
+        val text = mContext.getString(textBottom)
         setValues(text, value, minValue, maxValue)
     }
 
     @ColorInt
     private fun adjustAlpha(@ColorInt color: Int, factor: Float): Int {
-        val alpha = Math.round(Color.alpha(color) * factor)
+        val alpha = (Color.alpha(color) * factor).roundToInt()
         val red = Color.red(color)
         val green = Color.green(color)
         val blue = Color.blue(color)
@@ -597,31 +629,16 @@ class TemperatureView : View {
 
     private fun init(context: Context, attrs: AttributeSet?) {
         mContext = context
-        initDefaultValues()
         initAttrs(attrs)
-        initPaints()
-        initSizes()
-        initNewObjects()
     }
 
-    private fun initNewObjects() {
-        mRectBackground = RectF()
-        mRectProgress = RectF()
-    }
-
-    private fun initDefaultValues() {
-        mStringTextBottom = DEFAULT_TEXT_BOTTOM
-        mColorPrimary = DEFAULT_COLOR_PRIMARY
-        mFloatMaxSweepDegree = DEFAULT_MAX_SWEEP_DEGREE
-        mIntegerStrokeWidth = DEFAULT_STROKE_WIDTH
-        mStringTextCenter = DEFAULT_TEXT_CENTER
-    }
 
     private fun initAttrs(attrs: AttributeSet?) {
         if (attrs == null) return
         val a = mContext.theme.obtainStyledAttributes(attrs, R.styleable.TempView, 0, 0)
         try {
-            mStringTextBottom = a.getString(R.styleable.TempView_tmv_text_bottom)?: DEFAULT_TEXT_BOTTOM
+            mStringTextBottom =
+                a.getString(R.styleable.TempView_tmv_text_bottom) ?: DEFAULT_TEXT_BOTTOM
             mColorPrimary = a.getColor(
                 R.styleable.TempView_tmv_color_primary, DEFAULT_COLOR_PRIMARY
             )
@@ -654,14 +671,5 @@ class TemperatureView : View {
             a.recycle()
         }
     }
-
-    private fun initSizes() {
-        mRadiusBackgroundProgress = sizeConverter.dpToPx(80f)
-        mRadiusCircleValueShadowShader = mPaintBackgroundProgress.strokeWidth
-        mRadiusCircleValueShadow = mRadiusCircleValueShadowShader / 2f
-        mRadiusCircleValue = mRadiusCircleValueShadow / 1.4f
-        mRadiusCircleValueCenter = mRadiusCircleValue / 2f
-    }
-
 
 }

@@ -1,5 +1,8 @@
 package com.alirnp.tempretureview.utils
 
+/**
+ * a class to calculate pointer's area
+ */
 class CircleArea {
     private var xStart = 0f
     private var xEnd = 0f
