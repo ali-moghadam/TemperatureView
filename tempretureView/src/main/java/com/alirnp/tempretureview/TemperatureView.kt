@@ -6,7 +6,9 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
+import com.alirnp.tempretureview.callback.OnMoveListener
 import com.alirnp.tempretureview.callback.OnSeekChangeListener
+import com.alirnp.tempretureview.callback.OnSeekCompleteListener
 import com.alirnp.tempretureview.utils.*
 import kotlin.math.*
 
@@ -15,6 +17,8 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
     private val sizeConverter by lazy { SizeConvertor(context) }
 
     private var onSeekChangeListener: OnSeekChangeListener? = null
+    private var onSeekCompleteListener: OnSeekCompleteListener? = null
+    private var onMoveListener: OnMoveListener? = null
 
     private val defaultColorPrimary = Color.parseColor("#1a8dff")
     private val defaultStrokeWidth = sizeConverter.dpToPx(20f).toInt()
@@ -206,14 +210,14 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
      * return the view's desire width when width size is {wrap_content}
      */
     private fun getDesireWidth(): Int {
-        return (mRadiusBackgroundProgress * 2 + mPaintBackgroundProgress.getStrokeWidth() + getHorizontalPadding()).toInt()
+        return (mRadiusBackgroundProgress * 2 + mPaintBackgroundProgress.strokeWidth + getHorizontalPadding()).toInt()
     }
 
     /**
      * return the view's desire height when height size is {wrap_content}
      */
     private fun getDesireHeight(): Int {
-        return (mRadiusBackgroundProgress * 2 + mPaintBackgroundProgress.getStrokeWidth() + getVerticalPadding()).toInt()
+        return (mRadiusBackgroundProgress * 2 + mPaintBackgroundProgress.strokeWidth + getVerticalPadding()).toInt()
     }
 
 
@@ -535,7 +539,7 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
                     x >= mCircleArea.getXStart() && x <= mCircleArea.getXEnd() && y >= mCircleArea.getYStart() && y <= mCircleArea.getYEnd()
                 if (found) {
                     accessMoving = true
-                    onSeekChangeListener?.onMoving(false)
+                    onMoveListener?.isMoving(false)
                 } else {
                     accessMoving = false
                 }
@@ -563,8 +567,8 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
                 }
             }
             MotionEvent.ACTION_UP -> {
-                onSeekChangeListener?.onMoving(true)
-                onSeekChangeListener?.let { listener ->
+                onMoveListener?.isMoving(true)
+                onSeekCompleteListener?.let { listener ->
                     if (accessMoving) listener.onSeekComplete(
                         mIntegerValue
                     )
@@ -579,10 +583,26 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
 
 
     /**
-     * Announce changes
+     * called when change value by seeking the pointer's temp
      */
     fun setOnSeekChangeListener(onSeekChangeListener: OnSeekChangeListener?) {
         this.onSeekChangeListener = onSeekChangeListener
+    }
+
+    /**
+     * called when change value by seek is completed
+     */
+    fun setOnSeekCompleteListener(onSeekCompleteListener: OnSeekCompleteListener?) {
+        this.onSeekCompleteListener = onSeekCompleteListener
+    }
+
+    /**
+     * called when user is moving the pointer's temp
+     *
+     * Ex: you can lock viewPager when temperature is moving
+     */
+    fun setOnMoveListener(onMoveListener: OnMoveListener?) {
+        this.onMoveListener = onMoveListener
     }
 
     /**
