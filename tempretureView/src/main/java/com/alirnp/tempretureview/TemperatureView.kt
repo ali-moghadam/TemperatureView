@@ -613,12 +613,31 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
     }
 
     /**
+     * Get minimum value
+     */
+    fun getMinValue(): Int {
+        return mIntegerMinValue
+    }
+
+    /**
+     * Get maximum value
+     */
+    fun getMaxValue(): Int {
+        return mIntegerMaxValue
+    }
+
+    /**
      * Set current value
      *
      * @param value is show current value in view with validation
      */
     fun setValue(value: Int) {
         mIntegerValue = validateValue(value)
+
+        if (canCalledOnSizeChanged()) {
+            onSizeChanged(w, h, oldw, oldh)
+        }
+
         invalidate()
     }
 
@@ -627,6 +646,11 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
      */
     fun setMinValue(minValue: Int) {
         mIntegerMinValue = minValue
+
+        if (canCalledOnSizeChanged()) {
+            onSizeChanged(w, h, oldw, oldh)
+        }
+
         invalidate()
     }
 
@@ -635,6 +659,11 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
      */
     fun setMaxValue(maxValue: Int) {
         mIntegerMaxValue = maxValue
+
+        if (canCalledOnSizeChanged()) {
+            onSizeChanged(w, h, oldw, oldh)
+        }
+
         invalidate()
     }
 
