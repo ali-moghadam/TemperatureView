@@ -303,7 +303,7 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
         addPointerArea()
 
         // background
-        drawBackground(canvas, centerX, centerY)
+      //  drawBackground(canvas, centerX, centerY)
 
         // arcs
         drawArcs(canvas)
@@ -455,19 +455,26 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
         var y1: Float
         var x2: Float
         var y2: Float
-        var i = 0
-        while (i < 360) {
+        var angel = 0
+
+        val maxDegree = mFloatMaxSweepDegree + (getDegreePerHand() / 2)
+
+        while (angel < maxDegree) {
             // i = angel
-            x1 = cos(Math.toRadians(i.toDouble()))
+            x1 = cos(Math.toRadians(angel.toDouble()))
                 .toFloat() * (mFloatBeginOfClockLines - 0) + (mWidthBackgroundProgress / 2).toFloat()
-            y1 = sin(Math.toRadians(i.toDouble()))
+
+            y1 = sin(Math.toRadians(angel.toDouble()))
                 .toFloat() * (mFloatBeginOfClockLines - 0) + (mHeightBackgroundProgress / 2).toFloat()
-            x2 = cos(Math.toRadians(i.toDouble()))
+
+            x2 = cos(Math.toRadians(angel.toDouble()))
                 .toFloat() * (mFloatEndOfClockLines - 4) + (mWidthBackgroundProgress / 2).toFloat()
-            y2 = sin(Math.toRadians(i.toDouble()))
+
+            y2 = sin(Math.toRadians(angel.toDouble()))
                 .toFloat() * (mFloatEndOfClockLines - 4) + (mHeightBackgroundProgress / 2).toFloat()
+
             canvas.drawLine(x1, y1, x2, y2, mPaintDegree)
-            i += 12
+            angel += 12
         }
     }
 
@@ -497,7 +504,10 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
     }
 
     private fun drawArcs(canvas: Canvas) {
+        // background
         canvas.drawArc(mRectBackground, 0f, mFloatMaxSweepDegree, false, mPaintBackgroundProgress)
+
+        // progress
         canvas.drawArc(mRectBackground, 0f, mFloatPointerDegree, false, mPaintProgress)
     }
 
