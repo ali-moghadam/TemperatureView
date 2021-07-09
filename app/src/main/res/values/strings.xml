@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">TemperatureViewExample</string>
+    <string name="random_config">random config</string>
+    <string name="value">value</string>
+    <string name="min_value">min value</string>
+    <string name="minus">-</string>
+    <string name="plus">+</string>
+    <string name="max_value">max value</string>
+    <string name="content">content</string>
+    <string name="status">Status</string>
 </resources>
