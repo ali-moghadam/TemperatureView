@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="TempView">
+
+        <attr name="tmv_text_bottom" format="string" />
+        <attr name="tmv_color_primary" format="color" />
+        <attr name="tmv_size_stroke_width" format="dimension" />
+        <attr name="tmv_size_text_top" format="dimension" />
+        <attr name="tmv_size_text_bottom" format="dimension" />
+        <attr name="tmv_value_max_sweep_degree" format="float" />
+        <attr name="tmv_value" format="integer" />
+        <attr name="tmv_value_min" format="integer" />
+        <attr name="tmv_value_max" format="integer" />
+
+    </declare-styleable>
+
+</resources>
