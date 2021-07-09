@@ -8,60 +8,52 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import com.alirnp.tempretureview.callback.OnSeekChangeListener
-import com.alirnp.tempretureview.utils.CircleArea
-import com.alirnp.tempretureview.utils.SizeConvertor
-import kotlin.math.min
-import kotlin.math.roundToInt
+import com.alirnp.tempretureview.utils.*
+import kotlin.math.*
 
-class TemperatureView : View {
-
+class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     private val sizeConverter by lazy { SizeConvertor(context) }
 
     private var onSeekChangeListener: OnSeekChangeListener? = null
 
-    private val DEFAULT_TEXT_CENTER = "Celsius"
-    private val DEFAULT_TEXT_BOTTOM = "Freezer Temp"
-    private val DEFAULT_COLOR_PRIMARY = Color.parseColor("#1a8dff")
-    private val DEFAULT_START_DEGREE = -90f
-    private val DEFAULT_MAX_SWEEP_DEGREE = 300f
-    private val DEFAULT_STROKE_WIDTH = sizeConverter.dpToPx(20f).toInt()
-    private val DEFAULT_VALUE = 0
-    private val DEFAULT_MIN_VALUE = -10
-    private val DEFAULT_MAX_VALUE = 14
-    private val DEFAULT_TOP_TEXT_SIZE = sizeConverter.dpToPx(32f).toInt()
-    private val DEFAULT_BOTTOM_TEXT_SIZE: Int = sizeConverter.dpToPx(28f).toInt()
-
+    private val defaultColorPrimary = Color.parseColor("#1a8dff")
+    private val defaultStrokeWidth = sizeConverter.dpToPx(20f).toInt()
+    private val defaultTopTextSize = sizeConverter.dpToPx(32f).toInt()
+    private val defaultBottomTextSize: Int = sizeConverter.dpToPx(28f).toInt()
     private var mRadiusBackgroundProgress = sizeConverter.dpToPx(80f)
+
     private val mRadiusCircleValueShadowShader by lazy { mPaintBackgroundProgress.strokeWidth }
     private val mRadiusCircleValueShadow by lazy { mRadiusCircleValueShadowShader / 2f }
     private val mRadiusCircleValue by lazy { mRadiusCircleValueShadow / 1.4f }
     private val mRadiusCircleValueCenter by lazy { mRadiusCircleValue / 2f }
 
-    private var lengthOfHandClock: Float = 0f
     private var mFloatMaxSweepDegree = DEFAULT_MAX_SWEEP_DEGREE
+    private var lengthOfHandClock: Float = 0f
     private var mFloatPointerDegree: Float = 0f
     private var mFloatCenterXCircle = 0f
     private var mFloatCenterYCircle: Float = 0f
     private var mFloatBeginOfClockLines = 0f
     private var mFloatEndOfClockLines: Float = 0f
 
-    private var mColorPrimary = DEFAULT_COLOR_PRIMARY
+    private var mColorPrimary = defaultColorPrimary
     private var mColorProgressBackground: Int = 0
     private var mIntegerValue = 0
     private var mIntegerMinValue: Int = 0
     private var mIntegerMaxValue: Int = 0
-    private var mIntegerStrokeWidth = DEFAULT_STROKE_WIDTH
+    private var mIntegerStrokeWidth = defaultStrokeWidth
     private var mHeightBackgroundProgress = 0
     private var mWidthBackgroundProgress: Int = 0
     private var mTextSizeTop = 0
     private var mTextSizeBottom: Int = 0
 
-    private var accessMoving = false
-
     private var mRectBackground: RectF = RectF()
     private var mRectProgress: RectF = RectF()
 
+    /**
+     * when pointer is seeking, accessMoving is ture
+     */
+    private var accessMoving = false
 
     private val mPaintBackground by lazy {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -145,9 +137,8 @@ class TemperatureView : View {
 
     private val mPaintValueShadow: Paint = Paint()
 
-    private var mStringTextCenter: String = DEFAULT_TEXT_CENTER
+    private var mStringTextCenter = "Celsius"
     private var mStringTextBottom: String = DEFAULT_TEXT_BOTTOM
-    private lateinit var mContext: Context
     private var mCircleArea: CircleArea = CircleArea()
 
 
@@ -160,40 +151,29 @@ class TemperatureView : View {
     private var oldh: Int = -1
 
     /**
-     *  inflating a view Programmatically
-     */
-    constructor(context: Context) : super(context) {
-        init(context, null)
-    }
-
-    /**
-     *  inflating a view via XML
-     */
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init(context, attrs)
-    }
-
-    /**
      *  started before constructor called
      */
     init {
+        attrs?.let { attributes ->
+            initAttributes(attributes)
+        }
 
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        //Width
 
         //Width
         val widthMeasureMode = MeasureSpec.getMode(widthMeasureSpec)
         val widthMeasureSize = MeasureSpec.getSize(widthMeasureSpec)
+
         var width = 0
         when (widthMeasureMode) {
             MeasureSpec.UNSPECIFIED -> width = getDesireWidth()
             MeasureSpec.EXACTLY -> width = widthMeasureSize
             MeasureSpec.AT_MOST -> width = min(widthMeasureSize, getDesireWidth())
         }
-        //Height
+
         //Height
         val heightMeasureMode = MeasureSpec.getMode(heightMeasureSpec)
         val heightMeasureSize = MeasureSpec.getSize(heightMeasureSpec)
@@ -201,9 +181,9 @@ class TemperatureView : View {
         when (heightMeasureMode) {
             MeasureSpec.UNSPECIFIED -> height = getDesireHeight()
             MeasureSpec.EXACTLY -> height = heightMeasureSize
-            MeasureSpec.AT_MOST -> height = Math.min(heightMeasureSize, getDesireHeight())
+            MeasureSpec.AT_MOST -> height = heightMeasureSize.coerceAtMost(getDesireHeight())
         }
-        //Radius
+
         //Radius
         mRadiusBackgroundProgress =
             if (widthMeasureMode == MeasureSpec.EXACTLY && heightMeasureMode == MeasureSpec.EXACTLY) {
@@ -219,7 +199,6 @@ class TemperatureView : View {
         mWidthBackgroundProgress = width
         mHeightBackgroundProgress = height
 
-        //Tell to system measured size in px
 
         //Tell to system measured size in px
         setMeasuredDimension(width, height)
@@ -259,36 +238,54 @@ class TemperatureView : View {
         return w > -1 && w > -1 && oldw > -1 && oldh > -1
     }
 
+    /**
+     * don't allow change values when user is seeking the pointer
+     */
     private fun allowLayoutChange(): Boolean {
         return !accessMoving
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
+
         this.w = w
         this.h = h
         this.oldw = oldw
         this.oldh = oldh
+
         mFloatBeginOfClockLines = mRadiusBackgroundProgress
+
         mFloatEndOfClockLines = mRadiusBackgroundProgress - mPaintBackgroundProgress.strokeWidth / 2
+
         lengthOfHandClock = mFloatBeginOfClockLines - mFloatEndOfClockLines
+
         mRectBackground[mWidthBackgroundProgress.toFloat() / 2 - mRadiusBackgroundProgress + mPaintBackgroundProgress.strokeWidth + lengthOfHandClock, mHeightBackgroundProgress.toFloat() / 2 - mRadiusBackgroundProgress + mPaintBackgroundProgress.strokeWidth + lengthOfHandClock, mWidthBackgroundProgress.toFloat() / 2 + mRadiusBackgroundProgress - mPaintBackgroundProgress.strokeWidth - lengthOfHandClock] =
             mHeightBackgroundProgress.toFloat() / 2 + mRadiusBackgroundProgress - mPaintBackgroundProgress.strokeWidth - lengthOfHandClock
+
         mRectProgress[mWidthBackgroundProgress.toFloat() / 2 - mRadiusBackgroundProgress + (mPaintBackgroundProgress.strokeWidth + lengthOfHandClock), mHeightBackgroundProgress.toFloat() / 2 - mRadiusBackgroundProgress + (mPaintBackgroundProgress.strokeWidth + lengthOfHandClock), mWidthBackgroundProgress.toFloat() / 2 + mRadiusBackgroundProgress - (mPaintBackgroundProgress.strokeWidth - lengthOfHandClock)] =
             mHeightBackgroundProgress.toFloat() / 2 + mRadiusBackgroundProgress - (mPaintBackgroundProgress.strokeWidth - lengthOfHandClock)
+
         val sumValues = (mIntegerMaxValue - mIntegerMinValue).toFloat()
+
         mFloatPointerDegree = (mIntegerValue - mIntegerMinValue) * mFloatMaxSweepDegree / sumValues
+
         val colors = intArrayOf(mColorPrimary, Color.RED)
+
         val positions = floatArrayOf(0.25f, 1f)
+
         val gradient = SweepGradient(
             (mWidthBackgroundProgress / 2).toFloat(),
             (mHeightBackgroundProgress / 2).toFloat(),
             colors,
             positions
         )
+
         val gradientMatrix = Matrix()
+
         gradientMatrix.preRotate(-5f)
+
         gradient.setLocalMatrix(gradientMatrix)
+
         mPaintProgress.shader = gradient
     }
 
@@ -296,46 +293,66 @@ class TemperatureView : View {
         super.onDraw(canvas)
         val centerX = width / 2
         val centerY = height / 2
+
+        // save and rotate canvas
         canvas.save()
-        canvas.rotate(
-            DEFAULT_START_DEGREE,
-            centerX.toFloat(),
-            centerY.toFloat()
-        )
+        canvas.rotate(DEFAULT_START_DEGREE, centerX.toFloat(), centerY.toFloat())
+
+        // pointer
         addPointerLocation()
         addPointerArea()
+
+        // background
         drawBackground(canvas, centerX, centerY)
+
+        // arcs
         drawArcs(canvas)
+
+        // pointer
         drawPointer(canvas)
+
+        // hand clock
         drawHandClock(canvas)
-        canvas.restore() // restore canvas to default to display the text correctly
+
+
+        // restore canvas to default to display the text correctly
+        canvas.restore()
+
+        //texts
         drawTexts(canvas, centerX)
     }
 
-
+    /**
+     * get center x from degree of view
+     */
     private fun getDrawXOnBackgroundProgress(
         degree: Float,
         backgroundRadius: Float,
         backgroundWidth: Float
     ): Float {
-        var drawX = Math.cos(Math.toRadians(degree.toDouble())).toFloat()
+        var drawX = cos(Math.toRadians(degree.toDouble())).toFloat()
         drawX *= backgroundRadius
         drawX += backgroundWidth / 2
         return drawX
     }
 
+    /**
+     * get center y from degree of view
+     */
     private fun getDrawYOnBackgroundProgress(
         degree: Float,
         backgroundRadius: Float,
         backgroundHeight: Float
     ): Float {
-        var drawY = Math.sin(Math.toRadians(degree.toDouble())).toFloat()
+        var drawY = sin(Math.toRadians(degree.toDouble())).toFloat()
         drawY *= backgroundRadius
         drawY += backgroundHeight / 2
         return drawY
     }
 
-
+    /**
+     * get angel from x and y
+     */
     private fun getAngleFromPoint(
         firstPointX: Double,
         firstPointY: Double,
@@ -343,31 +360,43 @@ class TemperatureView : View {
         secondPointY: Double
     ): Double {
         if (secondPointX > firstPointX) {
-            return Math.atan2(
+            return atan2(
                 secondPointX - firstPointX,
                 firstPointY - secondPointY
             ) * 180 / Math.PI
         } else if (secondPointX < firstPointX) {
-            return 360 - Math.atan2(
+            return 360 - atan2(
                 firstPointX - secondPointX,
                 firstPointY - secondPointY
             ) * 180 / Math.PI
         }
-        return Math.atan2(0.0, 0.0)
+        return atan2(0.0, 0.0)
     }
 
+    /**
+     * calculate the temp from angel
+     */
     private fun getValueFromAngel(angel: Double): Double {
         return (angel / getDegreePerHand()) + mIntegerMinValue
     }
 
+    /**
+     * calculate degree between hand clock
+     */
     private fun getDegreePerHand(): Float {
         return mFloatMaxSweepDegree / getLeftValue()
     }
 
+    /**
+     * calculate value between min and max value
+     */
     private fun getLeftValue(): Float {
         return (mIntegerMaxValue - mIntegerMinValue).toFloat()
     }
 
+    /**
+     * draw texts in canvas
+     */
     private fun drawTexts(canvas: Canvas, centerX: Int) {
         canvas.drawText(
             String.format("%s°C", mIntegerValue),
@@ -388,22 +417,26 @@ class TemperatureView : View {
     }
 
     private fun getCircleArea(centerX: Float, centerY: Float, radius: Float): CircleArea {
-        var radius = radius
-        radius = radius + radius / 2
-        mCircleArea.setXStart(centerX - radius)
-        mCircleArea.setXEnd(centerX + radius)
-        mCircleArea.setYStart(centerY - radius)
-        mCircleArea.setYEnd(centerY + radius)
+        var mRadius = radius
+
+        mRadius += mRadius / 2
+        mCircleArea.setXStart(centerX - mRadius)
+        mCircleArea.setXEnd(centerX + mRadius)
+        mCircleArea.setYStart(centerY - mRadius)
+        mCircleArea.setYEnd(centerY + mRadius)
         return mCircleArea
     }
 
     private fun validateValue(value: Int): Int {
-        var value = value
-        if (value > mIntegerMaxValue) value = mIntegerMaxValue
-        if (value < mIntegerMinValue) value = mIntegerMinValue
-        return value
+        var mValue = value
+        if (mValue > mIntegerMaxValue) mValue = mIntegerMaxValue
+        if (mValue < mIntegerMinValue) mValue = mIntegerMinValue
+        return mValue
     }
 
+    /**
+     * user can hold and seek circle pointer
+     */
     private fun addPointerLocation() {
         mFloatCenterXCircle = getDrawXOnBackgroundProgress(
             mFloatPointerDegree,
@@ -425,13 +458,13 @@ class TemperatureView : View {
         var i = 0
         while (i < 360) {
             // i = angel
-            x1 = Math.cos(Math.toRadians(i.toDouble()))
+            x1 = cos(Math.toRadians(i.toDouble()))
                 .toFloat() * (mFloatBeginOfClockLines - 0) + (mWidthBackgroundProgress / 2).toFloat()
-            y1 = Math.sin(Math.toRadians(i.toDouble()))
+            y1 = sin(Math.toRadians(i.toDouble()))
                 .toFloat() * (mFloatBeginOfClockLines - 0) + (mHeightBackgroundProgress / 2).toFloat()
-            x2 = Math.cos(Math.toRadians(i.toDouble()))
+            x2 = cos(Math.toRadians(i.toDouble()))
                 .toFloat() * (mFloatEndOfClockLines - 4) + (mWidthBackgroundProgress / 2).toFloat()
-            y2 = Math.sin(Math.toRadians(i.toDouble()))
+            y2 = sin(Math.toRadians(i.toDouble()))
                 .toFloat() * (mFloatEndOfClockLines - 4) + (mHeightBackgroundProgress / 2).toFloat()
             canvas.drawLine(x1, y1, x2, y2, mPaintDegree)
             i += 12
@@ -507,7 +540,6 @@ class TemperatureView : View {
                 if (found) {
                     accessMoving = true
                     onSeekChangeListener?.onMoving(false)
-                    // TODO: 7/5/2021    break removed
                 } else {
                     accessMoving = false
                 }
@@ -521,9 +553,8 @@ class TemperatureView : View {
                 )
                 if (angel > 0 && angel < mFloatMaxSweepDegree) {
                     mFloatPointerDegree = angel.toFloat()
-                    val `val` = getValueFromAngel(mFloatPointerDegree.toDouble())
-                    val currentValue =
-                        Math.round(`val`).toInt() // for successfully convert angel to value
+                    val valueFromAngel = getValueFromAngel(mFloatPointerDegree.toDouble())
+                    val currentValue = valueFromAngel.roundToInt() // for successfully convert angel to value
                     val valueChanged = currentValue != mIntegerValue
                     mIntegerValue = currentValue
                     onSeekChangeListener?.let { listener ->
@@ -550,9 +581,6 @@ class TemperatureView : View {
         return true
     }
 
-    override fun performClick(): Boolean {
-        return super.performClick()
-    }
 
     /**
      * Announce changes
@@ -613,8 +641,9 @@ class TemperatureView : View {
     /**
      * The minimum & maximum value you can set to the view
      */
+    // TODO: 7/9/2021
     fun setValues(@StringRes textBottom: Int, value: Int, minValue: Int, maxValue: Int) {
-        val text = mContext.getString(textBottom)
+        val text = context.getString(textBottom)
         setValues(text, value, minValue, maxValue)
     }
 
@@ -627,41 +656,44 @@ class TemperatureView : View {
         return Color.argb(alpha, red, green, blue)
     }
 
-    private fun init(context: Context, attrs: AttributeSet?) {
-        mContext = context
-        initAttrs(attrs)
-    }
+    private fun initAttributes(attrs: AttributeSet) {
 
+        val a = context.theme.obtainStyledAttributes(attrs, R.styleable.TempView, 0, 0)
 
-    private fun initAttrs(attrs: AttributeSet?) {
-        if (attrs == null) return
-        val a = mContext.theme.obtainStyledAttributes(attrs, R.styleable.TempView, 0, 0)
         try {
             mStringTextBottom =
                 a.getString(R.styleable.TempView_tmv_text_bottom) ?: DEFAULT_TEXT_BOTTOM
-            mColorPrimary = a.getColor(
-                R.styleable.TempView_tmv_color_primary, DEFAULT_COLOR_PRIMARY
-            )
+
+            mColorPrimary =
+                a.getColor(R.styleable.TempView_tmv_color_primary, defaultColorPrimary)
+
             mColorProgressBackground =
                 a.getColor(R.styleable.TempView_tmv_color_progress_background, mColorPrimary)
+
             mFloatMaxSweepDegree = a.getFloat(
                 R.styleable.TempView_tmv_value_max_sweep_degree, DEFAULT_MAX_SWEEP_DEGREE
+
             )
             mIntegerStrokeWidth = a.getDimensionPixelSize(
-                R.styleable.TempView_tmv_size_stroke_width, DEFAULT_STROKE_WIDTH
+                R.styleable.TempView_tmv_size_stroke_width, defaultStrokeWidth
             )
+
             mTextSizeTop = a.getDimensionPixelSize(
-                R.styleable.TempView_tmv_size_text_top, DEFAULT_TOP_TEXT_SIZE
+                R.styleable.TempView_tmv_size_text_top, defaultTopTextSize
             )
+
             mTextSizeBottom = a.getDimensionPixelSize(
-                R.styleable.TempView_tmv_size_text_bottom, DEFAULT_BOTTOM_TEXT_SIZE
+                R.styleable.TempView_tmv_size_text_bottom, defaultBottomTextSize
             )
+
             mIntegerMinValue = a.getInteger(
                 R.styleable.TempView_tmv_value_min, DEFAULT_MIN_VALUE
             )
+
             mIntegerMaxValue = a.getInteger(
                 R.styleable.TempView_tmv_value_max, DEFAULT_MAX_VALUE
             )
+
             mIntegerValue = validateValue(
                 a.getInteger(
                     R.styleable.TempView_tmv_value, DEFAULT_VALUE
@@ -671,5 +703,4 @@ class TemperatureView : View {
             a.recycle()
         }
     }
-
 }

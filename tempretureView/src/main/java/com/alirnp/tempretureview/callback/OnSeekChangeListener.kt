@@ -1,6 +1,5 @@
 package com.alirnp.tempretureview.callback
 
-
 interface OnSeekChangeListener {
 
     /**

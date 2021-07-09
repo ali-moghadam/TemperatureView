@@ -7,12 +7,25 @@
     tools:context=".MainActivity">
 
     <com.alirnp.tempretureview.TemperatureView
+        android:id="@+id/temperatureView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="Hello World!"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="80"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_margin="10dp"
+        android:textSize="20sp"
+        android:text="@string/app_name"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
