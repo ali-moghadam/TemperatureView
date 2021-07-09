@@ -9,23 +9,33 @@
     <com.alirnp.tempretureview.TemperatureView
         android:id="@+id/temperatureView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintHeight_default="percent"
-        app:layout_constraintHeight_percent="80"
+        app:layout_constraintHeight_percent="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+
+        app:tmv_color_primary="@color/tmv_default_color_primary"
+        app:tmv_size_stroke_width="20dp"
+        app:tmv_size_text_top="32sp"
+        app:tmv_size_text_bottom="25sp"
+        app:tmv_text_bottom="Freezer Temp"
+        app:tmv_value="9"
+        app:tmv_value_max="12"
+        app:tmv_value_max_sweep_degree="320"
+        app:tmv_value_min="-10"
+        />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/app_name"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_margin="10dp"
-        android:textSize="20sp"
-        android:text="@string/app_name"/>
+        app:layout_constraintRight_toRightOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

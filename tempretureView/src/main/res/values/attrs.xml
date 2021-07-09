@@ -5,7 +5,6 @@
 
         <attr name="tmv_text_bottom" format="string" />
         <attr name="tmv_color_primary" format="color" />
-        <attr name="tmv_color_progress_background" format="color" />
         <attr name="tmv_size_stroke_width" format="dimension" />
         <attr name="tmv_size_text_top" format="dimension" />
         <attr name="tmv_size_text_bottom" format="dimension" />

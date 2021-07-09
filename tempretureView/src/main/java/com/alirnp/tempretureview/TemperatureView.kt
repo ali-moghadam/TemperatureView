@@ -6,7 +6,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
-import androidx.annotation.StringRes
 import com.alirnp.tempretureview.callback.OnSeekChangeListener
 import com.alirnp.tempretureview.utils.*
 import kotlin.math.*
@@ -37,7 +36,6 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
     private var mFloatEndOfClockLines: Float = 0f
 
     private var mColorPrimary = defaultColorPrimary
-    private var mColorProgressBackground: Int = 0
     private var mIntegerValue = 0
     private var mIntegerMinValue: Int = 0
     private var mIntegerMaxValue: Int = 0
@@ -65,7 +63,7 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
     private val mPaintBackgroundProgress by lazy {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             strokeWidth = mIntegerStrokeWidth.toFloat()
-            color = adjustAlpha(mColorProgressBackground, 0.08f)
+            color = adjustAlpha(mColorPrimary, 0.08f)
             style = Paint.Style.STROKE
             strokeCap = Paint.Cap.ROUND
         }
@@ -302,9 +300,6 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
         addPointerLocation()
         addPointerArea()
 
-        // background
-      //  drawBackground(canvas, centerX, centerY)
-
         // arcs
         drawArcs(canvas)
 
@@ -511,15 +506,6 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
         canvas.drawArc(mRectBackground, 0f, mFloatPointerDegree, false, mPaintProgress)
     }
 
-    private fun drawBackground(canvas: Canvas, centerX: Int, centerY: Int) {
-        canvas.drawCircle(
-            centerX.toFloat(),
-            centerY.toFloat(),
-            mRadiusBackgroundProgress - mPaintBackgroundProgress.strokeWidth,
-            mPaintBackground
-        )
-    }
-
     private fun addPointerArea() {
         //CIRCLE AREA FOR DETECT TOUCH
         val centerXCircleArea = getDrawXOnBackgroundProgress(
@@ -635,26 +621,17 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
     /**
      * The minimum & maximum value you can set to the view
      */
-    fun setValues(textBottom: String, value: Int, minValue: Int, maxValue: Int) {
+    fun config(config: Config) {
         if (allowLayoutChange()) {
-            mIntegerValue = validateValue(value)
-            mIntegerMinValue = minValue
-            mIntegerMaxValue = maxValue
-            mStringTextBottom = textBottom
+            mIntegerValue = validateValue(config.value)
+            mIntegerMinValue = config.minValue
+            mIntegerMaxValue = config.maxValue
+            mStringTextBottom = config.text
             if (canCalledOnSizeChanged()) {
                 onSizeChanged(w, h, oldw, oldh)
             }
-            requestLayout()
+            invalidate()
         }
-    }
-
-    /**
-     * The minimum & maximum value you can set to the view
-     */
-    // TODO: 7/9/2021
-    fun setValues(@StringRes textBottom: Int, value: Int, minValue: Int, maxValue: Int) {
-        val text = context.getString(textBottom)
-        setValues(text, value, minValue, maxValue)
     }
 
     @ColorInt
@@ -676,9 +653,6 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
 
             mColorPrimary =
                 a.getColor(R.styleable.TempView_tmv_color_primary, defaultColorPrimary)
-
-            mColorProgressBackground =
-                a.getColor(R.styleable.TempView_tmv_color_progress_background, mColorPrimary)
 
             mFloatMaxSweepDegree = a.getFloat(
                 R.styleable.TempView_tmv_value_max_sweep_degree, DEFAULT_MAX_SWEEP_DEGREE
