@@ -24,7 +24,7 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
     private val defaultStrokeWidth = sizeConverter.dpToPx(20f).toInt()
     private val defaultTopTextSize = sizeConverter.dpToPx(32f).toInt()
     private val defaultBottomTextSize: Int = sizeConverter.dpToPx(28f).toInt()
-    private var mRadiusBackgroundProgress = sizeConverter.dpToPx(80f)
+    private var mRadiusBackgroundProgress = 0f
 
     private val mRadiusCircleValueShadowShader by lazy { mPaintBackgroundProgress.strokeWidth }
     private val mRadiusCircleValueShadow by lazy { mRadiusCircleValueShadowShader / 2f }
@@ -186,7 +186,9 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
             MeasureSpec.AT_MOST -> height = heightMeasureSize.coerceAtMost(getDesireHeight())
         }
 
+
         //Radius
+        // set view's height or width when they are "wrap_content"
         mRadiusBackgroundProgress =
             if (widthMeasureMode == MeasureSpec.EXACTLY && heightMeasureMode == MeasureSpec.EXACTLY) {
                 val size = min(widthMeasureSize, heightMeasureSize)
@@ -196,8 +198,10 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
                 (size - mPaintBackgroundProgress.strokeWidth) / 2
             } else {
                 //Default Value
-                sizeConverter.dpToPx(80f)
+                sizeConverter.dpToPx(150f)
             }
+
+
         mWidthBackgroundProgress = width
         mHeightBackgroundProgress = height
 
@@ -539,7 +543,7 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
                     x >= mCircleArea.getXStart() && x <= mCircleArea.getXEnd() && y >= mCircleArea.getYStart() && y <= mCircleArea.getYEnd()
                 if (found) {
                     accessMoving = true
-                    onMoveListener?.isMoving(false)
+                    onMoveListener?.isMoving(true)
                 } else {
                     accessMoving = false
                 }
@@ -567,7 +571,7 @@ class TemperatureView constructor(context: Context, attrs: AttributeSet?) : View
                 }
             }
             MotionEvent.ACTION_UP -> {
-                onMoveListener?.isMoving(true)
+                onMoveListener?.isMoving(false)
                 onSeekCompleteListener?.let { listener ->
                     if (accessMoving) listener.onSeekComplete(
                         mIntegerValue

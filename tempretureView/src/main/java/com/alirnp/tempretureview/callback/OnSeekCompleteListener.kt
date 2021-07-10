@@ -1,6 +1,6 @@
 package com.alirnp.tempretureview.callback
 
-interface OnSeekCompleteListener {
+fun interface OnSeekCompleteListener {
 
     /**
      * called when change value by seek is completed

@@ -1,6 +1,6 @@
 package com.alirnp.tempretureview.callback
 
-interface OnMoveListener {
+fun interface OnMoveListener {
 
     /**
      * called when user is moving the pointer's temp
