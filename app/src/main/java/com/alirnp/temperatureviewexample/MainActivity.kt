@@ -16,20 +16,23 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    private var isMoving = false
+    private var status = "NONE"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         showCurrentValue(binding.temperatureView.getValue())
         showMinValue(binding.temperatureView.getMinValue())
         showMaxValue(binding.temperatureView.getMaxValue())
+        showStatus()
 
 
         binding.buttonRandomConfig.setOnClickListener {
-            val value = (-5..15).random()
             val minValue = (-10..-5).random()
+            val value = (-5..15).random()
             val maxValue = (15..20).random()
 
             val config = Config("random config!", value, minValue, maxValue)
@@ -46,7 +49,7 @@ class MainActivity : AppCompatActivity() {
             binding.temperatureView.setValue(--currentValue)
 
             // show value in textView
-            showCurrentValue(currentValue)
+            showCurrentValue(binding.temperatureView.getValue())
         }
 
         binding.fabPlusCurrentValue.setOnClickListener {
@@ -54,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             binding.temperatureView.setValue(++currentValue)
 
             // show value in textView
-            showCurrentValue(currentValue)
+            showCurrentValue(binding.temperatureView.getValue())
         }
 
 
@@ -63,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             binding.temperatureView.setMinValue(--minValue)
 
             // show value in textView
-            showMinValue(minValue)
+            showMinValue(binding.temperatureView.getMinValue())
         }
 
         binding.fabPlusMinValue.setOnClickListener {
@@ -71,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             binding.temperatureView.setMinValue(++minValue)
 
             // show value in textView
-            showMinValue(minValue)
+            showMinValue(binding.temperatureView.getMinValue())
         }
 
         binding.fabMinusMaxValue.setOnClickListener {
@@ -79,7 +82,7 @@ class MainActivity : AppCompatActivity() {
             binding.temperatureView.setMaxValue(--maxValue)
 
             // show value in textView
-            showMaxValue(maxValue)
+            showMaxValue(binding.temperatureView.getMaxValue())
         }
 
         binding.fabPlusMaxValue.setOnClickListener {
@@ -87,28 +90,33 @@ class MainActivity : AppCompatActivity() {
             binding.temperatureView.setMaxValue(++maxValue)
 
             // show value in textView
-            showMaxValue(maxValue)
+            showMaxValue(binding.temperatureView.getMaxValue())
         }
 
-        binding.temperatureView.setOnSeekChangeListener(object : OnSeekChangeListener {
-            override fun onSeekChange(value: Int) {
-                binding.textView.text = "onSeekChange"
+        binding.temperatureView.setOnSeekChangeListener { value ->
+            this.status = "onSeekChange"
+            binding.textViewStatus.text = this.status
 
-                // show value in textView
-                showCurrentValue(value)
-            }
-        })
-        binding.temperatureView.setOnSeekCompleteListener(object : OnSeekCompleteListener {
-            override fun onSeekComplete(value: Int) {
-                binding.textView.text = "onSeekComplete"
-            }
-        })
 
-        binding.temperatureView.setOnMoveListener(object : OnMoveListener {
-            override fun isMoving(isMoving: Boolean) {
-                //  textView.text = "isMoving $isMoving"
-            }
-        })
+            // show value in textView
+            showCurrentValue(value)
+            showStatus()
+        }
+
+        binding.temperatureView.setOnSeekCompleteListener {
+            this.status = "onSeekComplete"
+            binding.textViewStatus.text = this.status
+
+            showStatus()
+        }
+
+        binding.temperatureView.setOnMoveListener { isMoving ->
+            //disable scrolling when user seeking pointer
+            binding.lockableScrollView.setScrollingEnabled(!isMoving)
+
+            this.isMoving = isMoving
+            showStatus()
+        }
     }
 
     private fun showCurrentValue(value: Int) {
@@ -121,5 +129,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showMaxValue(value: Int) {
         binding.textViewMaxValue.text = "maxValue = $value"
+    }
+
+    private fun showStatus() {
+        binding.textViewStatus.text = "status = $status\nisMoving = $isMoving"
     }
 }

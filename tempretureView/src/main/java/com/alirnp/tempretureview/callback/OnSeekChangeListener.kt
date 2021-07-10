@@ -1,6 +1,6 @@
 package com.alirnp.tempretureview.callback
 
-interface OnSeekChangeListener {
+fun interface OnSeekChangeListener {
     /**
      * called when change value by seeking the pointer's temp
      */

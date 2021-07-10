@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.alirnp.temperatureviewexample.LockableScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:orientation="vertical"
+    android:id="@+id/lockableScrollView"
     tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,7 +17,7 @@
             android:id="@+id/temperatureView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="0.5"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -155,15 +156,22 @@
 
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/textView_status"
             style="@style/textView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
             android:text="@string/status"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_maxValue"
             app:layout_constraintRight_toRightOf="parent" />
 
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+
+</com.alirnp.temperatureviewexample.LockableScrollView>
