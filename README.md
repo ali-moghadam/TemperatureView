@@ -1,10 +1,10 @@
 # TemperatureView   
 
-## a view to choose tempreture in IoT (Intenet of things)  app's
+## a view to choose tempereture in IoT (Intenet of things)  app's
 
 <br />
 
-download and use sample app &nbsp; [![APK](https://img.shields.io/badge/APK-Demo-brightgreen.svg)](https://github.com/alipapital/TempViewDemo/blob/master/app/tempView%20v1.apk)
+download and use sample app &nbsp; [![APK](https://img.shields.io/badge/APK-Demo-brightgreen.svg)](https://github.com/ali-moghadam/TemperatureView/blob/master/files/temperatureView.apk?raw=true)
 
 ![](files/temperatureView.png)
 
@@ -82,7 +82,7 @@ temperatureView.config(config)
 <br/> 
 
 #### OnSeekChangeListener
-##### when temperature changed value
+##### When temperature changed value
 
 ```kotlin
 temperatureView.setOnSeekChangeListener { value ->
@@ -93,7 +93,7 @@ temperatureView.setOnSeekChangeListener { value ->
 <br/>
 
 #### OnSeekCompleteListener
-##### when seek pointer's view finish
+##### When seek pointer's view finish
 ```kotlin
         temperatureView.setOnSeekCompleteListener {
          // do stuff
@@ -104,7 +104,7 @@ temperatureView.setOnSeekChangeListener { value ->
 
 #### OnMoveListener
 ##### When pointer is seeking by user
-> **_NOTE:_**  you can disable scrolling of ScrollView when isMoving = true
+> **_NOTE:_**  You can disable scrolling of ScrollView when isMoving = true
 
 ```kotlin
        temperatureView.setOnMoveListener { isMoving ->
