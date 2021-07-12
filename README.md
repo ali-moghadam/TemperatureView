@@ -6,7 +6,7 @@
 
 download and use sample app &nbsp; [![APK](https://img.shields.io/badge/APK-Demo-brightgreen.svg)](https://github.com/ali-moghadam/TemperatureView/blob/master/files/temperatureView.apk?raw=true)
 
-![](files/temperatureView.png)
+[![temperature-View.png](https://i.postimg.cc/NMRynzrW/temperature-View.png)]
 
 <br />
 
