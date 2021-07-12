@@ -1,12 +1,12 @@
 # TemperatureView   
 
-## a view to choose tempereture in IoT (Intenet of things)  app's
+## a view to choose tempereture in IoT(Intenet of things) applications
 
 <br />
 
-download and use sample app &nbsp; [![APK](https://img.shields.io/badge/APK-Demo-brightgreen.svg)](https://github.com/ali-moghadam/TemperatureView/blob/master/files/temperatureView.apk?raw=true)
+**Download sample app &nbsp;** [![APK](https://img.shields.io/badge/APK-Demo-brightgreen.svg)](https://github.com/ali-moghadam/TemperatureView/blob/master/files/temperatureView.apk?raw=true)
 
-[![temperature-View.png](https://i.postimg.cc/NMRynzrW/temperature-View.png)]
+![](files/temperatureView.png)
 
 <br />
 
